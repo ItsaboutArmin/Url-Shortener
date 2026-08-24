@@ -2,10 +2,11 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
+	"math/big"
 	"strings"
-	"sync/atomic"
 	"time"
 
 	"URL-Shotener/internal/cache"
@@ -15,8 +16,6 @@ import (
 )
 
 const base62Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-
-var urlIDCounter uint64 = 1000000
 
 type URLService interface {
 	Shorten(ctx context.Context, originalURL string, expireAt *time.Time) (string, error)
@@ -37,17 +36,22 @@ func NewURLService(repo repository.URLRepository, cache *cache.RedisCache, cfg *
 	}
 }
 
-func toBase62(num uint64) string {
-	if num == 0 {
-		return string(base62Chars[0])
+// generateShortCode creates a random base62 string of the given length.
+func generateShortCode(length int) (string, error) {
+	if length <= 0 {
+		length = 6
 	}
-	var result []byte
-	for num > 0 {
-		remainder := num % 62
-		result = append([]byte{base62Chars[remainder]}, result...)
-		num /= 62
+	result := make([]byte, length)
+	max := big.NewInt(int64(len(base62Chars)))
+
+	for i := 0; i < length; i++ {
+		idx, err := rand.Int(rand.Reader, max)
+		if err != nil {
+			return "", err
+		}
+		result[i] = base62Chars[idx.Int64()]
 	}
-	return string(result)
+	return string(result), nil
 }
 
 func isValidURL(rawURL string) bool {
@@ -55,29 +59,39 @@ func isValidURL(rawURL string) bool {
 }
 
 func (s *urlService) Shorten(ctx context.Context, originalURL string, expireAt *time.Time) (string, error) {
-
+	// ۱. اعتبارسنجی URL
 	if !isValidURL(originalURL) {
 		return "", errors.New("invalid URL: must start with http:// or https://")
 	}
 
-	id := atomic.AddUint64(&urlIDCounter, 1)
-	shortCode := toBase62(id)
+	for attempt := 0; attempt < 5; attempt++ {
+		shortCode, err := generateShortCode(6)
+		if err != nil {
+			return "", fmt.Errorf("failed to generate short code: %w", err)
+		}
 
-	urlModel := &model.URL{
-		OriginalURL: originalURL,
-		ShortCode:   shortCode,
-		ExpiresAt:   expireAt,
-	}
+		urlModel := &model.URL{
+			OriginalURL: originalURL,
+			ShortCode:   shortCode,
+			ExpiresAt:   expireAt,
+		}
 
-	err := s.repo.Save(ctx, urlModel)
-	if err != nil {
+		err = s.repo.Save(ctx, urlModel)
+		if err == nil {
+
+			_ = s.cache.Set(ctx, shortCode, originalURL)
+			fullShortURL := fmt.Sprintf("%s/%s", s.config.BaseURL, shortCode)
+			return fullShortURL, nil
+		}
+
+		if strings.Contains(err.Error(), "duplicate key") {
+			continue
+		}
+
 		return "", fmt.Errorf("failed to save URL: %w", err)
 	}
 
-	_ = s.cache.Set(ctx, shortCode, originalURL)
-
-	fullShortURL := fmt.Sprintf("%s/%s", s.config.BaseURL, shortCode)
-	return fullShortURL, nil
+	return "", errors.New("could not generate a unique short code after multiple attempts")
 }
 
 func (s *urlService) Resolve(ctx context.Context, shortCode string) (string, error) {
