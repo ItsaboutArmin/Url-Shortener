@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کوتاه‌کننده لینک</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+   
+    <div class="stars"></div>
+    <div class="stars stars2"></div>
+    <div class="stars stars3"></div>
+
+    
+    <main class="glass-card">
+        <h1 class="title">🔗 کوتاه‌کننده لینک</h1>
+        <p class="subtitle">لینک بلندت را بده، نسخه کوتاهش را تحویل بگیر</p>
+
+        <form id="shorten-form">
+            <div class="input-group">
+                <input type="url" name="url" placeholder="https://example.com/very-long-link" required>
+                <button type="submit">کوتاه کن</button>
+            </div>
+        </form>
+
+        <div id="result" class="result-box hidden">
+            <span>لینک کوتاه شما:</span>
+            <a href="#" target="_blank" id="short-url"></a>
+            <button id="copy-btn" class="copy-btn">📋 کپی</button>
+        </div>
+
+        <div id="error" class="error hidden"></div>
+    </main>
+
+    <script>
+        const form = document.getElementById('shorten-form');
+        const resultBox = document.getElementById('result');
+        const shortUrlLink = document.getElementById('short-url');
+        const errorBox = document.getElementById('error');
+        const copyBtn = document.getElementById('copy-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = form.elements['url'];
+            const url = input.value.trim();
+
+          
+            resultBox.classList.add('hidden');
+            errorBox.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/v1/shorten', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'خطا در کوتاه‌سازی');
+                }
+
+                shortUrlLink.href = data.short_url;
+                shortUrlLink.textContent = data.short_url;
+                resultBox.classList.remove('hidden');
+            } catch (err) {
+                errorBox.textContent = '⚠️ ' + err.message;
+                errorBox.classList.remove('hidden');
+            }
+        });
+
+        copyBtn.addEventListener('click', () => {
+            const shortUrl = shortUrlLink.textContent;
+            navigator.clipboard.writeText(shortUrl).then(() => {
+                copyBtn.textContent = '✅ کپی شد';
+                setTimeout(() => copyBtn.textContent = '📋 کپی', 1500);
+            });
+        });
+    </script>
+</body>
+</html>

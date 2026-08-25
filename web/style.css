@@ -1,0 +1,204 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f0c29;  
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    overflow: hidden;
+    direction: rtl;
+    padding: 1rem;
+}
+
+
+.stars, .stars2, .stars3 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.stars {
+    background: transparent;
+    box-shadow: 100px 120px #fff, 230px 340px #fff, 410px 90px #fff, 600px 250px #fff,
+                780px 60px #fff, 930px 400px #fff, 1100px 180px #fff, 1250px 300px #fff;
+    animation: twinkle 4s infinite alternate;
+}
+
+.stars2 {
+    transform: scale(1.5);
+    box-shadow: 150px 60px #fff, 400px 150px #fff, 700px 50px #fff, 950px 200px #fff,
+                1200px 100px #fff, 350px 450px #fff, 800px 500px #fff, 1000px 350px #fff;
+    animation: twinkle 6s infinite alternate-reverse;
+    opacity: 0.7;
+}
+
+.stars3 {
+    transform: scale(2);
+    box-shadow: 80px 300px #fff, 300px 500px #fff, 550px 200px #fff, 880px 100px #fff,
+                1050px 480px #fff, 1300px 220px #fff, 200px 600px #fff, 750px 600px #fff;
+    animation: twinkle 8s infinite alternate;
+    opacity: 0.4;
+}
+
+@keyframes twinkle {
+    from { opacity: 0.3; }
+    to { opacity: 1; }
+}
+
+
+.glass-card {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 550px;
+    padding: 2.5rem 2rem;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    margin-bottom: 2rem;
+}
+
+
+.input-group {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 1rem;
+    backdrop-filter: blur(8px);
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.input-group button {
+    padding: 1rem 1.8rem;
+    border: none;
+    border-radius: 14px;
+    background: #6c5ce7;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.input-group button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(108, 92, 231, 0.4);
+}
+
+.input-group button:active {
+    transform: translateY(0);
+}
+
+/* ========== بخش نتیجه ========== */
+.result-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+}
+
+.result-box span {
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.result-box a {
+    color: #a29bfe;
+    font-weight: 500;
+    text-decoration: none;
+    flex: 1;
+    word-break: break-all;
+}
+
+.copy-btn {
+    background: #00b894;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.copy-btn:hover {
+    background: #00a381;
+}
+
+.error {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 82, 82, 0.25);
+    border: 1px solid #ff5252;
+    border-radius: 14px;
+    color: #ffcdd2;
+    font-weight: 500;
+}
+
+.hidden {
+    display: none;
+}
+
+
+@media (max-width: 600px) {
+    .input-group {
+        flex-direction: column;
+    }
+
+    .glass-card {
+        padding: 1.8rem 1.2rem;
+    }
+}
